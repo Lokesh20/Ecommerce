@@ -7,9 +7,9 @@ export default defineConfig({
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
-  timeout:600000,
+  timeout:60000,
   expect:{
-timeout:600000,
+timeout:60000,
   },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

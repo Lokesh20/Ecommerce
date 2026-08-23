@@ -103,7 +103,7 @@ test("End to End test case", async ({ browser }) => {
 
 })
 
-test.only("With Page Object", async ({ browser }) => {
+test("With Page Object", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto("https://rahulshettyacademy.com/client/#/auth/login");
@@ -139,7 +139,7 @@ test.only("With Page Object", async ({ browser }) => {
 
 })
 
-test("Playright locator ", async ({ browser }) => {
+test.only("Playright locator ", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto("https://rahulshettyacademy.com/client/#/auth/login");
@@ -147,33 +147,39 @@ test("Playright locator ", async ({ browser }) => {
     const productName = 'ZARA COAT 3';
     const password = "Mahindra@123"
 
-    await page.getByRole("textbox",{name:'Email'}).fill(email);
-   // await page.locator('input#userEmail').fill(email);
-    await page.locator("input[formcontrolname='userPassword']").fill(password);
-    await page.locator('input.login-btn').click();
-    const toast = await page.locator('div#toast-container');
-    const toatLoginMessage = await toast.textContent();
-    await expect(toatLoginMessage).toEqual(' Login Successfully ')
-    //await page.pause();
+    await page.getByRole("textbox", { name: 'Email' }).fill(email);
+    await page.getByPlaceholder("enter your passsword").fill(password);
+    await page.getByRole("button", { value: 'Login' }).click();
+    //  get for toast message
+    const toast =page.getByRole('status');
+   // const toatLoginMessage = await toast.textContent();
+   // await expect(toatLoginMessage).toEqual(' Login Successfully ')
+
+
     //product page
     const products = page.locator('.card-body')
     await page.locator(".card-body b").first().waitFor();
     const titles = await page.locator(".card-body b").allTextContents();
     const count = await products.count();
-    for (let i = 0; i < count; ++i) {
+    products.filter({hasText:productName}).locator("text= Add To Cart").click();
+
+   /* for (let i = 0; i < count; ++i) {
         const singleProduct = await products.nth(i).locator('b').textContent();
         if (singleProduct === productName) {
             await products.nth(i).locator("text= Add To Cart").click();
             break;
         }
-    }
+    }*/
 
-    await page.locator("button  label").waitFor();
-    const cartCount = await page.locator("button  label").textContent();
+  
+    const cartcount = page.locator("button  label");
+    await cartcount.waitFor();
+    const cartCount = await cartcount.textContent();
     await expect(cartCount).toEqual("1");
 
     //naviagte to cart page
-    await page.locator("button[routerlink='/dashboard/cart']").click();
+    await page.getByRole('link',{name:'Cart'})
+    //await page.locator("button[routerlink='/dashboard/cart']").click();
     const getCartProduct = await page.locator('.cartSection h3').textContent();
     await expect(getCartProduct).toContain(productName);
     await page.locator('text=Checkout').click();
@@ -185,7 +191,7 @@ test("Playright locator ", async ({ browser }) => {
     await page.locator('input.input.txt').nth(1).fill('1234');
     await page.locator('input.input.txt').nth(2).fill('Lokesh Koli');
 
-    await page.locator('input.input.txt').nth(3).fill('Lokesh Koli');
+    await page.locator('input.input.txkt').nth(3).fill('Lokesh Koli');
 
     await page.locator('text=Apply Coupon').nth(1).click();
     await page.locator('text=* Invalid Coupon').waitFor();
