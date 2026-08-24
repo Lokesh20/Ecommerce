@@ -151,9 +151,9 @@ test.only("Playright locator ", async ({ browser }) => {
     await page.getByPlaceholder("enter your passsword").fill(password);
     await page.getByRole("button", { value: 'Login' }).click();
     //  get for toast message
-    const toast =page.getByRole('status');
-   // const toatLoginMessage = await toast.textContent();
-   // await expect(toatLoginMessage).toEqual(' Login Successfully ')
+    const toast = page.getByRole('status');
+    // const toatLoginMessage = await toast.textContent();
+    // await expect(toatLoginMessage).toEqual(' Login Successfully ')
 
 
     //product page
@@ -161,85 +161,55 @@ test.only("Playright locator ", async ({ browser }) => {
     await page.locator(".card-body b").first().waitFor();
     const titles = await page.locator(".card-body b").allTextContents();
     const count = await products.count();
-    products.filter({hasText:productName}).locator("text= Add To Cart").click();
-
-   /* for (let i = 0; i < count; ++i) {
-        const singleProduct = await products.nth(i).locator('b').textContent();
-        if (singleProduct === productName) {
-            await products.nth(i).locator("text= Add To Cart").click();
-            break;
-        }
-    }*/
-
-  
-    const cartcount = page.locator("button  label");
-    await cartcount.waitFor();
-    const cartCount = await cartcount.textContent();
-    await expect(cartCount).toEqual("1");
+    await products.filter({ hasText: productName }).locator("text= Add To Cart").click();
+    const cartcount = page.getByRole('button', { name: /cart/i }).locator('label');
+    //await cartcount.waitFor();
+    await expect(cartcount).toHaveText("1");
 
     //naviagte to cart page
-    await page.getByRole('link',{name:'Cart'})
-    //await page.locator("button[routerlink='/dashboard/cart']").click();
-    const getCartProduct = await page.locator('.cartSection h3').textContent();
-    await expect(getCartProduct).toContain(productName);
-    await page.locator('text=Checkout').click();
-    await page.locator('div.item__title').waitFor();
-    const getCheckoutproduct = await page.locator('div.item__title').textContent();
-    await expect(getCheckoutproduct).toContain(productName);
-    await page.locator('select.input.ddl').nth(0).selectOption("05");
-    await page.locator('select.input.ddl').nth(1).selectOption("05");
-    await page.locator('input.input.txt').nth(1).fill('1234');
-    await page.locator('input.input.txt').nth(2).fill('Lokesh Koli');
+    await page.locator("button[routerlink='/dashboard/cart']").click();
+    await page.locator('.cartSection').getByRole('heading').textContent();
 
-    await page.locator('input.input.txkt').nth(3).fill('Lokesh Koli');
 
-    await page.locator('text=Apply Coupon').nth(1).click();
-    await page.locator('text=* Invalid Coupon').waitFor();
+    await expect(page.locator('.cartSection').getByRole('heading', { level: 3 })).toHaveText(productName);
 
+    await page.getByText('Checkout').click();
+
+    await expect(page.locator('.item__title')).toHaveText(productName);
+    await page.getByRole('combobox').nth(0).selectOption("05");
+    await page.getByRole('combobox').nth(1).selectOption("05");
+    await page.getByRole('textbox').nth(1).fill('1234');
+    await page.getByRole('textbox').nth(2).fill('Lokesh');
+
+    await page.getByRole('textbox').nth(3).fill('Lokesh Koli');
+    await page.getByRole('button', { name: 'Apply Coupon' }).click();
+    await page.getByText('Invalid Coupon').waitFor();
     await page.locator('.user__name input').nth(1).pressSequentially('IND');
-    await page.locator('.ta-results.list-group.ng-star-inserted').waitFor();
-    const countryList = await page.locator('span.ng-star-inserted');
-    const country = await countryList.count();
-    for (let i = 0; i < country; ++i) {
+    await page.locator('.ta-results').getByText('India', { exact: true }).click();
+    await expect(page.locator('.user__name').locator('label')).toHaveText('lokeshk20892@gmail.com');
+    await page.getByText('Place Order').click();
 
-        const countryName = await countryList.nth(i).textContent();
-        if (countryName === ' India') {
-            await countryList.nth(i).click();
-            break;
-        }
-    }
-
-    const email1 = await page.locator('.user__name label').textContent();
-    await expect(email1).toEqual('lokeshk20892@gmail.com');
-    await page.locator('text=Place Order ').click();
 
     // thank page
-    await page.locator('.hero-primary').waitFor();
-    const thank = await page.locator('.hero-primary').textContent();
-    expect(thank).toEqual(' Thankyou for the order. ');
-    //const orderNumber = await page.locator('tr td label').nth(1).textContent().trim();
-    const orderNumber = (await page.locator('tr td label').nth(1).textContent())?.trim();
+
+    await expect(page.locator('.hero-primary')).toHaveText(' Thankyou for the order. ');
+    const orderNumber = (await page.locator('tr td label').nth(1).textContent())?.replace(/\|/g, '').trim();;
 
     //order page
-    await page.locator("button[routerlink='/dashboard/myorders']").click();
-    await page.locator('text=Your Orders').waitFor();
+    await page.getByRole('button', { name: 'Orders' }).click();
+    await page.getByText('Your Orders').waitFor();
+    //await page.pause();
+    // await page.locator('tbody tr th').filter({ hasText: orderNumber }).getByRole('button', { name: 'View' }).click();
+    const row = page.getByRole('row').filter({ hasText: orderNumber });
 
-    const orderlist = await page.locator('tbody tr th');
-    const ordercount = await orderlist.count();
+    await row.getByRole('button', { name: 'View' }).click();
 
-    for (let i = 0; i < ordercount; i++) {
-
-        const orderNumber1 = (await orderlist.nth(i).textContent()).trim();
-        if (orderNumber.includes(orderNumber1)) {
-            await page.locator('.btn.btn-primary').nth(i).click();
-            break;
-        }
-    }
 
     //order summary page
-    await page.locator('text= order summary ').waitFor();
-    const getOrderNumber = await page.locator('div.-main').textContent();
-    await expect(orderNumber).toContain(getOrderNumber);
-    ;
+    // await page.locator('text= order summary ').waitFor();
+    //const getOrderNumber = await page.locator('div.-main').textContent();
+    //await expect(orderNumber).toContain(getOrderNumber);
+
+    await expect(await page.locator('div.-main')).toHaveText(orderNumber);
 
 })
